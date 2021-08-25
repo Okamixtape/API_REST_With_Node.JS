@@ -10,6 +10,7 @@ const cors = require('cors');
 
 // Importation des routeurs
 const userRoutes = require('./routes/user');
+const saucesRoutes = require('./routes/sauces');
 
 // Connection API au cluster MongoDB
 mongoose.connect('mongodb+srv://new_user87:Moononthewater87@cluster0.lxpxl.mongodb.net/Cluster0?retryWrites=true&w=majority',
@@ -52,6 +53,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // Middleware servant à utiliser les routes
 app.use('/api/auth', userRoutes);
+app.use('/api/sauces', saucesRoutes);
 
 // Exporter cette application pour pouvoir y accéder depuis autres fichiers du projet (serveur Node)
 module.exports = app;

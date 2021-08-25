@@ -14,5 +14,5 @@ const userSchema = mongoose.Schema ({
 // Application du validateur au schéma "utilisateur"
 userSchema.plugin(uniqueValidator);
 
-// Exportation du schéma de données pour l'exploiter comme modèle dans le projet (nomDuModele,variableDuSchema)
+// Exportation du schéma de données pour l'exploiter comme modèle dans le projet avec le nom du modèle et la constante correspondante
 module.exports = mongoose.model('User', userSchema); 
