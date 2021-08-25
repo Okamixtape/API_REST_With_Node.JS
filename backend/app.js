@@ -1,8 +1,9 @@
 // Importation d'Express
 const express = require('express');
-
 // Importation de Mongoose
 const mongoose = require('mongoose');
+// Importation de Path pour accéder au path de notre serveur
+const path = require('path');
 
 // Importation de Cors
 const cors = require('cors');
@@ -45,6 +46,9 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // app.use = Middleware
+
+// Middleware pour la gestion de l'enregistrement des images
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // Middleware servant à utiliser les routes
 app.use('/api/auth', userRoutes);
