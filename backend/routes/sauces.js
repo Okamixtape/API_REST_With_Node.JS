@@ -28,5 +28,8 @@ router.get('/:id', auth, saucesCtrl.getOneSauce );
 // Route utilisant la méthode GET pour récupérer toutes les sauces
 router.get('/', auth, saucesCtrl.getAllSauces);
 
+// Route utilisant la méthode POST pour liker ou disliker une sauce avec son identifiant
+router.post('/:id/like', auth, saucesCtrl.likeSauce);
+
 // Exportation du routeur 
 module.exports = router;
