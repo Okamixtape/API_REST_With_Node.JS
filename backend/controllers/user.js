@@ -20,7 +20,9 @@ exports.signup = (req, res, next) => {
                 password: hash
             });
             user.save()
+                // Si la promesse se résout, on indique que l'utilisateur a bien été créé
                 .then(() => res.status(201).json({ message: 'Utilisateur créé !'}))
+                // Sinon un message d'erreur s'affiche
                 .catch(error => res.status(400).json({ error }));
         })
         .catch(error => res.status(500).json({ error }));
@@ -51,7 +53,7 @@ exports.login = (req, res, next) => {
                             // Ce token contient l'ID de l'utilisateur en tant que payload (données encodées dans le token)
                             { userId: user._id },
                             // Chaîne secrète de développement temporaire pour encoder notre token (à remplacer par une chaîne aléatoire beaucoup plus longue pour la production)
-                            'RANDOM_TOKEN_SECRET',
+                            process.env.TOKEN_SECRET_KEY,
                             // Durée de validité du token : 24 heures
                             { expiresIn: '24h' }
                         )

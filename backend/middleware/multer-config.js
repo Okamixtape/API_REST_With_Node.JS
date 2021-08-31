@@ -22,4 +22,7 @@ const storage = multer.diskStorage ({
     },
 });
 
-module.exports = multer({ storage }).single('image');
+// Déclaration d'une constante pour limiter la taille des images téléchargées
+const maxFileSize = 1 * 1024 * 1024;
+
+module.exports = multer({ storage, limits: {fileSize: maxFileSize} }).single('image');

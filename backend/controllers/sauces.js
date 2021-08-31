@@ -1,97 +1,157 @@
+// ---------------- IMPORTATIONS GÉNÉRALES ---------------------- // 
+
 // Importatin du modèle 'Sauces' pour l'utiliser dans les fonctions
 const Sauce = require('../models/Sauces');
 
 // Importation du modèle 'Like' pour l'utiliser dans les fonctions
 const Like = require('../models/Like');
 
-// Importation de file system pour la gestion des fichiers
+// Importation de file system pour la gestion des fichiers (de Node)
 const fs = require('fs');
 
-// Fonction permettant de créer un objet 'sauce'
+// --------------------- CONTROLLERS ---------------------- // 
+
+// ---- Fonction permettant de créer un objet 'sauce' ---- //
+
 exports.createSauce = (req, res, next) => {
+    // Récupération et transformation du req.body.sauce (string) en objet JS utilisable
     const sauceObject = JSON.parse(req.body.sauce);
+    // Suppression de l'id (qui va être généré automatique par MongoDB)
     delete sauceObject._id;
+    // Création d'une nouvelle instance de Sauce (à partir de '../models/Sauces')
     const sauce = new Sauce ({
+        // L'opérateur spread pour faire une copie de tous les éléments de req.body.sauce
         ...sauceObject,
+        // Résolution URL complète de l'image 
+        // (req.protocol = 'http' + '://' + req.get('host') = 'localhost:3000' + '/images/' + nom du fichier)
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+        // Implémentation des likes/dislikes à 0
         likes : 0,
         dislikes : 0,
         usersLiked : [],
         usersdisLiked : []
     });
+    // Enregistrement de la sauce dans MongoDB
     sauce.save()
+        // La promesse se résout et un message nous indique que l'opération s'est bien déroulée
         .then(() => res.status(201).json({ message: ' Objet enregistré !' }))
+        // Sinon un message d'erreur s'affiche
         .catch(error => res.status(400).json({ error }));
 };
 
-// Fonction permettant la modification d'une sauce
-exports.modifySauce =  (req, res, next) =>{
-    const sauceObject = req.file ? {
+
+// ---- Fonction permettant de modifier un objet 'sauce' ---- //
+
+exports.modifySauce =  (req, res, next) => {
+    // Création de l'objet JS en prenant compte des modifications
+    // (? permet de savoir si un req.file/une image existe déjà)
+    const sauceObject = req.file ? { // Si oui
+        // Transformation du req.body.sauce (string) en objet JS utilisable
         ...JSON.parse(req.body.sauce),
+        // Modification de l'adresse URL menant à l'image
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` 
-    } : {...req.body}; 
+    } : {...req.body}; // On modifie uniquement le titre/description/etc... (pas l'image) de la sauce
+    // Mise à jour de la sauce en la remplaçant par la sauce passée comme second argument
     Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id }) 
+        // La promesse se résout et un message nous indique que l'opération s'est bien déroulée
         .then(()=> res.status(200).json({ message: 'Objet modifié !' }))
+        // Sinon un message d'erreur s'affiche
         .catch(error => res.status(400).json({ error }));
 };
 
-// Fonction permettant la suppression d'une sauce
+// ---- Fonction permettant de supprimer un objet 'sauce' ---- //
+
 exports.deleteSauce = (req, res, next) => {
+    // Recherche dans la base de données de la sauce à supprimer avec son identifiant
     Sauce.findOne({ _id: req.params.id })
-    .then( sauce => {
-        const filename = sauce.imageUrl.split('/images')[1]
-        fs.unlink(`images/${filename}`, () => { 
-            Sauce.deleteOne({ _id: req.params.id })
-                .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
-                .catch(error => res.status(404).json({ error }));
+        // La promesse se résout (on trouve la sauce avec son identifiant)
+        .then( sauce => { 
+            // Recherche du nom du fichier de l'image
+            const filename = sauce.imageUrl.split('/images')[1]
+            // Utilisation de 'file system' pour supprimer le fichier du dossier 'images'
+            fs.unlink(`images/${filename}`, () => { 
+                // Et suppression également depuis la base de données
+                Sauce.deleteOne({ _id: req.params.id })
+                    // La promesse se résout et un message nous indique que l'opération s'est bien déroulée
+                    .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
+                    // Sinon un message d'erreur s'affiche (fichier introuvable ou inexistant)
+                    .catch(error => res.status(404).json({ error }));
+            })
         })
-    })
-    .catch(error => res.status(500).json({ error }));
+        // Sinon un message d'erreur s'affiche (erreur serveur)
+        .catch(error => res.status(500).json({ error }));
 }; 
 
-// Fonction permettant la récupération d'un seul objet (une sauce)
+// ---- Fonction permettant de récupérer un seul objet 'sauce' ---- //
+
 exports.getOneSauce = (req, res, next) => {
+    // Recherche dans la base de données de la sauce avec son identifiant
     Sauce.findOne({ _id: req.params.id })
+        // La promesse se résout, on accède à la page produit de la sauce demandée
         .then(sauce => res.status(200).json(sauce))
+        // Sinon un message d'erreur s'affiche (sauce introuvable ou inexistante)
         .catch(error => res.status(404).json({ error }));
 };
 
-// Fonction permettant la récupération de tous les objets (toutes les sauces)
+// ---- Fonction permettant de récupérer tous les objets 'sauce' ---- //
+
 exports.getAllSauces = (req, res, next) => {
+    // Recherche dans la base de données de toutes les sauces
     Sauce.find() 
+        // La promesse se résout, on accède à la page affichant toutes les sauces
         .then(sauces => res.status(200).json(sauces)) 
+        // Sinon un message d'erreur s'affiche (erreur client)
         .catch(error => res.status(400).json({ error }));
 };
 
-// Fonction permettant de liker ou disliker une sauce
-exports.likeSauce= (req, res, next) => {
-    // Définit le statut « Like » pour l'userId fourni
+// ---- Fonction permettant de liker ou disliker un objet 'sauce' ---- //
+
+exports.likeOrDislikeSauce = (req, res, next) => {
+
+    // Définition du statut « Like » pour l'userId fourni
     const likeValue = req.body.like;
+    // Récupération de l'userId (un seul utilisateur n'a qu'une seule valeur pour une sauce)
     const userId = req.body.userId;
-    // Récupération de l'identifiant de la sauce pour liker ou disliker
+
+    // Récupération de l'identifiant de la sauce à liker ou disliker
     Sauce.findOne({ _id: req.params.id })
+    // Promesse qui se résout si on trouve la sauce
     .then(sauce => {
+        // Tableaux permettant de stocker le like/dislike d'un utilisateur
         let newUsersLiked = sauce.usersLiked;
-        const newUsersDisliked = sauce.usersDisliked;
+        let newUsersDisliked = sauce.usersDisliked;
         // Si like = 1, l'utilisateur aime (= like) la sauce
         if (likeValue == 1) {
+            // On push l'ID de l'utilisateur qui a liké
             newUsersLiked.push(userId)
+            // Et on incrémente un like
             const newLikes = newUsersLiked.length
+            // Mise à jour du nombre de like de la sauce
+            // (avec le nouveau 'like' et l'id de l'utilisateur correspondant)
             Sauce.updateOne({ _id: req.params.id },{
                 likes: newLikes,
                 usersLiked: newUsersLiked
             }) 
+        // Si la promesse se résout, un message indique que l'opération s'est bien déroulée
         .then(()=> res.status(200).json({ message : 'Vous avez likée cette sauce !'}))
+        // Sinon un message d'erreur s'affiche
         .catch(error => res.status(400).json({ error }));
         }
         // Si like = 0, l'utilisateur annule son like ou son dislike
         else if (likeValue == 0) {
+            // Constante permettant de retirer l'userId du tableau des likes
             const indexToRemoveFromLikes = newUsersLiked.indexOf(userId)
-            newUsersLiked.splice(indexToRemoveFromLikes,1)
+                if (indexToRemoveFromLikes !== -1 ) {
+                    newUsersLiked.splice(indexToRemoveFromLikes,1)
+                }
             const newLikes = newUsersLiked.length
+            // On retire son dislike
             const indexToRemoveFromDislikes = newUsersDisliked.indexOf(userId)
-            newUsersDisliked.splice(indexToRemoveFromDislikes,1)
+                if (indexToRemoveFromDislikes !== -1 ) {
+                    newUsersDisliked.splice(indexToRemoveFromDislikes,1)
+                }
             const newDislikes = newUsersDisliked.length
+            // Mise à jour du nombre de like et dislike
             Sauce.updateOne({ _id: req.params.id },{
                 likes: newLikes,
                 dislikes: newDislikes,
@@ -103,15 +163,22 @@ exports.likeSauce= (req, res, next) => {
         }
         // Si like = -1, l'utilisateur n'aime pas (= dislike) la sauce
         else if (likeValue == -1) {
+            // On push l'ID de l'utilisateur qui a disliké
             newUsersDisliked.push(userId)
+            // Et on incrémente un like
             const newDislikes = newUsersDisliked.length
+            /// Mise à jour du nombre de dislike de la sauce 
+            // (avec le nouveau 'dislike' et l'id de l'utilisateur correspondant)
             Sauce.updateOne({ _id: req.params.id },{
                 dislikes: newDislikes,
                 usersDisliked: newUsersDisliked
             })
+            // Si la promesse se résout, un message indique que l'opération s'est bien déroulée
             .then(()=> res.status(200).json({ message: 'Vous avez dislikée cette sauce !' }))
+            // Sinon un message d'erreur s'affiche
             .catch(error => res.status(400).json({ error }));
         }
     })
-    .catch(error => res.status(500).json({ error }));
+    // Si la sauce est introuvable un message d'erreur s'affiche (404)
+    .catch(error => res.status(400).json({ error }));
 } 

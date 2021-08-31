@@ -29,7 +29,7 @@ router.get('/:id', auth, saucesCtrl.getOneSauce );
 router.get('/', auth, saucesCtrl.getAllSauces);
 
 // Route utilisant la méthode POST pour liker ou disliker une sauce avec son identifiant
-router.post('/:id/like', auth, saucesCtrl.likeSauce);
+router.post('/:id/like', auth, saucesCtrl.likeOrDislikeSauce);
 
 // Exportation du routeur 
 module.exports = router;
