@@ -33,6 +33,8 @@ Avant d'installer les dépendances, exécutez la commande suivante dans votre te
 MONGO_DB=mongodb+srv://new_user87:Moononthewater87@cluster0.lxpxl.mongodb.net/Cluster0?retryWrites=true&w=majority
 TOKEN_SECRET_KEY=RANDOM_TOKEN_SECRET
 
+5) Si le dossier 'images' ne figure pas dans les dossiers du backend, veuillez le créer (s'il est manquant vous ne pourrez pas télécharger une image si vous voulez créer ou modifer une sauce en cliquant sur 'ADD SAUCE')
+
 ## Utilisation ##
 
 Vous pouvez maintenant lancer : `nodemon server` dans votre terminal
