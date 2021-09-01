@@ -117,17 +117,17 @@ exports.likeOrDislikeSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
     // Promesse qui se résout si on trouve la sauce
     .then(sauce => {
-        // Tableaux permettant de stocker le like/dislike d'un utilisateur
+        // Tableaux permettant de stocker le like/dislike d'un utilisateur avec son userId
         let newUsersLiked = sauce.usersLiked;
         let newUsersDisliked = sauce.usersDisliked;
         // Si like = 1, l'utilisateur aime (= like) la sauce
         if (likeValue == 1) {
-            // On push l'ID de l'utilisateur qui a liké
+            // On push l'ID de l'utilisateur qui a liké dans le tableau 'newUsersLiked'
             newUsersLiked.push(userId)
             // Et on incrémente un like
             const newLikes = newUsersLiked.length
-            // Mise à jour du nombre de like de la sauce
-            // (avec le nouveau 'like' et l'id de l'utilisateur correspondant)
+            // Mise à jour du nombre de like de la sauce avec son identifiant
+            // (avec le nouveau 'like' de l'userId de l'utilisateur correspondant)
             Sauce.updateOne({ _id: req.params.id },{
                 likes: newLikes,
                 usersLiked: newUsersLiked
@@ -139,36 +139,44 @@ exports.likeOrDislikeSauce = (req, res, next) => {
         }
         // Si like = 0, l'utilisateur annule son like ou son dislike
         else if (likeValue == 0) {
-            // Constante permettant de retirer l'userId du tableau des likes
+            // Constante permettant de chercher l'userId du tableau 'newUsersLiked'
             const indexToRemoveFromLikes = newUsersLiked.indexOf(userId)
+                // Si l'élément cherché (userId) est présent dans ce tableau
                 if (indexToRemoveFromLikes !== -1 ) {
+                    // On enlève un like du tableau
                     newUsersLiked.splice(indexToRemoveFromLikes,1)
                 }
+            // Mise à jour du nouveau tableau (avec le like en moins)
             const newLikes = newUsersLiked.length
-            // On retire son dislike
+            // Constante permettant de chercher l'userId du tableau 'newUsersDisliked'
             const indexToRemoveFromDislikes = newUsersDisliked.indexOf(userId)
+                // Si l'élément cherché (userId) est présent dans ce tableau
                 if (indexToRemoveFromDislikes !== -1 ) {
+                    // On enlève un dislike du tableau
                     newUsersDisliked.splice(indexToRemoveFromDislikes,1)
                 }
+            // Mise à jour du nouveau tableau (avec le dislike en moins)
             const newDislikes = newUsersDisliked.length
-            // Mise à jour du nombre de like et dislike
+            // Mise à jour globale du nombre de like et dislike (dans les tableaux usersLiked et usersDisliked) de la sauce avec son identifiant
             Sauce.updateOne({ _id: req.params.id },{
                 likes: newLikes,
                 dislikes: newDislikes,
                 usersLiked: newUsersLiked,
                 usersDisliked: newUsersDisliked
             })
+            // Si la promesse se résout, un message indique que l'opération s'est bien déroulée
             .then(()=> res.status(200).json({ message: 'Notation annulée !' }))
+            // Sinon un message d'erreur s'affiche
             .catch(error => res.status(400).json({ error })); 
         }
         // Si like = -1, l'utilisateur n'aime pas (= dislike) la sauce
         else if (likeValue == -1) {
-            // On push l'ID de l'utilisateur qui a disliké
+            // On push l'ID de l'utilisateur qui a disliké dans le tableau 'newUsersDisliked'
             newUsersDisliked.push(userId)
-            // Et on incrémente un like
+            // Et on incrémente un dislike
             const newDislikes = newUsersDisliked.length
-            /// Mise à jour du nombre de dislike de la sauce 
-            // (avec le nouveau 'dislike' et l'id de l'utilisateur correspondant)
+            /// Mise à jour du nombre de dislike de la sauce avec son identifiant
+            // (avec le nouveau 'dislike' de l'userId de l'utilisateur correspondant)
             Sauce.updateOne({ _id: req.params.id },{
                 dislikes: newDislikes,
                 usersDisliked: newUsersDisliked
