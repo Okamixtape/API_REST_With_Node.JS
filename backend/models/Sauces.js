@@ -1,7 +1,7 @@
 // Importation de Mongoose permettant la création de schéma de données
 const mongoose = require('mongoose');
 
-// Création d'un schéma de données pour les sauces
+// Création d'un schéma de données pour les sauces (utilisation dans les fonctions dans ./backend/controllers/sauces)
 const saucesSchema = mongoose.Schema ({
     userId: { type: String, required: true },
     name: { type: String, required: true },

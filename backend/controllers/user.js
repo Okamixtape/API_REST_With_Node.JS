@@ -1,3 +1,5 @@
+// ---------------- IMPORTATIONS GÉNÉRALES ---------------------- // 
+
 // Importation du package de chiffrement bcrypt pour crypter les mots de passe
 const bcrypt = require('bcrypt');
 
@@ -7,8 +9,13 @@ const jwt = require('jsonwebtoken');
 // Importatin du modèle 'User' pour l'utiliser dans les deux fonctions 'signup' et 'login'
 const User = require('../models/User');
 
-// Fonction/Middleware 'signup' pour l'enregistrement de nouveaux utilisateurs
-// Qui permet le cryptage du mot de passe, et créer un utilisateur avec le mdp crypté dans la base de données
+
+
+// --------------------- CONTROLLERS ---------------------- // 
+
+// ---- Fonction/Middleware 'signup' permettant d'enregistrer de nouveaux utilisateurs ---- //
+
+// Fonction permet le cryptage du mot de passe, et créer un utilisateur avec le mdp crypté dans la base de données
 exports.signup = (req, res, next) => {
     // Nous appelons la fonction de hachage de bcrypt dans notre mot de passe et lui demandons de « saler » le mot de passe 10 fois.
     bcrypt.hash(req.body.password, 10) 
@@ -19,18 +26,21 @@ exports.signup = (req, res, next) => {
                 email: req.body.email,
                 password: hash
             });
+            // Enregistrement du nouvel utilisateur
             user.save()
                 // Si la promesse se résout, on indique que l'utilisateur a bien été créé
                 .then(() => res.status(201).json({ message: 'Utilisateur créé !'}))
                 // Sinon un message d'erreur s'affiche
                 .catch(error => res.status(400).json({ error }));
         })
+        // Sinon un message d'erreur s'affiche
         .catch(error => res.status(500).json({ error }));
 };
 
-// Fonction/Middleware 'login' pour connecter les utilisateurs existants
-// Récupération de l'utilisateur de la base de données qui correspond à l'adresse email rentrée
+// ---- Fonction/Middleware 'login' permettant de connecter les utilisateurs existants ---- //
+
 exports.login = (req, res, next) => {
+    // Récupération de l'utilisateur de la base de données qui correspond à l'adresse email rentrée
     User.findOne({ email: req.body.email })
         // Si l'utilisateur n'est pas reconnu on envoie une erreur
         .then(user => {
@@ -45,10 +55,10 @@ exports.login = (req, res, next) => {
                         return res.status(401).json({ error: 'Mot de passe incorrect !' });
                     }
                     // Si la comparaison est bonne (il a été rentré les identifiants valables)
-                    // On renvoir l'identifiant de l'utilisateur et un TOKEN permettant de se connecter à sa session
+                    // On renvoie l'identifiant de l'utilisateur et un TOKEN permettant de se connecter à sa session
                     res.status(200).json({
                         userId: user._id,
-                        // Méthode sign pour encoder un nouveau token
+                        // Méthode sign de jwt pour encoder un nouveau token
                         token: jwt.sign(
                             // Ce token contient l'ID de l'utilisateur en tant que payload (données encodées dans le token)
                             { userId: user._id },
@@ -59,7 +69,9 @@ exports.login = (req, res, next) => {
                         )
                     });
                 })
+                // Sinon un message d'erreur s'affiche
                 .catch(error => res.status(500).json({ error }));
         })
+        // Sinon un message d'erreur s'affiche
         .catch(error => res.status(500).json({ error }));
 };
