@@ -18,7 +18,7 @@ const fs = require('fs');
 exports.createSauce = (req, res, next) => {
     // Récupération et transformation du req.body.sauce (string) en objet JS utilisable
     const sauceObject = JSON.parse(req.body.sauce);
-    // Suppression de l'id (qui va être généré automatique par MongoDB)
+    // Suppression de l'id (qui va être généré automatiquement par MongoDB)
     delete sauceObject._id;
     // Création d'une nouvelle instance de Sauce (à partir de '../models/Sauces')
     const sauce = new Sauce ({
@@ -110,7 +110,7 @@ exports.getAllSauces = (req, res, next) => {
 
 exports.likeOrDislikeSauce = (req, res, next) => {
 
-    // Définition du statut « Like » pour l'userId fourni
+    // Définition du statut « Like » pour l'userId fourni ( 1 = like, 0 = annuler notation, -1 = dislike )
     const likeValue = req.body.like;
     // Récupération de l'userId (un seul utilisateur n'a qu'une seule valeur pour une sauce)
     const userId = req.body.userId;
@@ -124,7 +124,7 @@ exports.likeOrDislikeSauce = (req, res, next) => {
         let newUsersDisliked = sauce.usersDisliked;
         // Si like = 1, l'utilisateur aime (= like) la sauce
         if (likeValue == 1) {
-            // On push l'ID de l'utilisateur qui a liké dans le tableau 'newUsersLiked'
+            // On ajoute l'identifiant de l'utilisateur qui a liké au tableau 'UsersLiked' (méthode push())
             newUsersLiked.push(userId)
             // Et on incrémente un like
             const newLikes = newUsersLiked.length
@@ -173,7 +173,7 @@ exports.likeOrDislikeSauce = (req, res, next) => {
         }
         // Si like = -1, l'utilisateur n'aime pas (= dislike) la sauce
         else if (likeValue == -1) {
-            // On push l'ID de l'utilisateur qui a disliké dans le tableau 'newUsersDisliked'
+            // On ajoute l'identifiant de l'utilisateur qui a disliké au tableau 'UsersDisliked' (méthode push())
             newUsersDisliked.push(userId)
             // Et on incrémente un dislike
             const newDislikes = newUsersDisliked.length

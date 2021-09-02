@@ -9,13 +9,16 @@ const router = express.Router();
 // Importation du controlleur 'user'
 const userCtrl = require('../controllers/user');
 
+// Importation du middleware 'password
+const passCtrl = require("../middleware/password-validation")
+
 
 
 // ---------------- ROUTES UTILISATEUR ---------------------- // 
 
 // Les routes utilisent la méthode POST pour les fonctions 'signup' et 'login'
-router.post('/signup', userCtrl.signup);
-router.post('/login', userCtrl.login);
+router.post('/signup', passCtrl, userCtrl.signup);
+router.post('/login', passCtrl, userCtrl.login);
 
 
 

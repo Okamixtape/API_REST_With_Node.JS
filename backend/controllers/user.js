@@ -19,7 +19,7 @@ const User = require('../models/User');
 exports.signup = (req, res, next) => {
     // Nous appelons la fonction de hachage de bcrypt dans notre mot de passe et lui demandons de « saler » le mot de passe 10 fois.
     bcrypt.hash(req.body.password, 10) 
-        // fonction asynchrone qui renvoie une Promise dans laquelle nous recevons le hash généré
+        // Fonction asynchrone qui renvoie une Promise dans laquelle nous recevons le hash généré
         .then(hash => {
             // Nous créons un utilisateur et l'enregistrons dans la base de données
             const user = new User({
