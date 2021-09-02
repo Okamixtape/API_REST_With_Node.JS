@@ -13,7 +13,10 @@ module.exports = (req, res, next) => {
     // Si le mot de passe ne remplit pas les conditions/règles du mdp rentré 
     if (!passwordSchema.validate(req.body.password)) {
         // Affichage d'un message d'erreur 
-        return res.status(400).json({ error: 'Veuillez renseigner un mot de passe complexe ! Il doit contenir au moins, un chiffre, une minuscule, une majuscule et au moins 8 caractères !'});
+        return res.status(400).json({ 
+            error: 'Veuillez renseigner un mot de passe complexe ! Il doit contenir au moins, un chiffre, une minuscule, une majuscule et au moins 8 caractères !' +
+            passwordSchema.validate('Essayez un autre mot de passe !', { list: true }),
+        });
     // Sinon le mdp est accepté
     } else {
         next();
