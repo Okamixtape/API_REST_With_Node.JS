@@ -27,6 +27,7 @@ Avant d'installer les dépendances, exécutez la commande suivante dans votre te
 - "mongoose": "^5.13.8", = `npm install --save mongoose`
 - "mongoose-unique-validator": "^2.0.3", = `npm install --save mongoose-unique-validator`
 - "multer": "^1.4.3" = `npm install --save multer`
+- "password-validator": "^5.1.1" = `npm install password-validator`
 
 4) Veuillez créer un fichier '.env' à la racine du dossier (backend), veuillez renseigner les variables suivantes :
 
